@@ -1,6 +1,43 @@
 # joint call on hadley
 
-[![](https://mermaid.ink/img/pako:eNp1U02PgjAU_CvN86IRXCkfCsnuZU32snvZTTxsuNRSEAMtodXoGv_7lg8VUXuhTOfNG6aPI1ARMQiAZkTKRUqSkuQhR3pFacmoSgVHn98hb7CahZIdjY8NUK0xykQiXzYi5e8ky0y6Lq-HJhrUfIle9U6SvMiY7NZ2y4YV00ApV6zckWx02S1WTcnpbKQiItN8u2F0PV7xe6cJ40IdCvahRe7dXitry-fXG9NdheG93SWNe347ol3XNfGR7WUv4QG6ZPjQEBWcEqWr5HCE9Cc9d7BsgzuTut0b7Fnjm6TGSIpSVXcVsX2vFSc5kwWhDK2IouuNWKGO5nWG-lj_th_G0vYCA3JW5iSN9PDW6iGoNctZCIHeRiwm20yFEPKKSrZK_Bw4hUCVW2bAtoiIYu24QxDrNDVaEA7BEfYQYHc2sefebOr6ju9PsW3AAQLL9ye-47iOh7FvWdjCJwP-hNAK08ls7mLPd23seg62HbuW-60Pm54sSpUov9rfrXqc_gEHPhG1?type=png)](https://mermaid.live/edit#pako:eNp1U02PgjAU_CvN86IRXCkfCsnuZU32snvZTTxsuNRSEAMtodXoGv_7lg8VUXuhTOfNG6aPI1ARMQiAZkTKRUqSkuQhR3pFacmoSgVHn98hb7CahZIdjY8NUK0xykQiXzYi5e8ky0y6Lq-HJhrUfIle9U6SvMiY7NZ2y4YV00ApV6zckWx02S1WTcnpbKQiItN8u2F0PV7xe6cJ40IdCvahRe7dXitry-fXG9NdheG93SWNe347ol3XNfGR7WUv4QG6ZPjQEBWcEqWr5HCE9Cc9d7BsgzuTut0b7Fnjm6TGSIpSVXcVsX2vFSc5kwWhDK2IouuNWKGO5nWG-lj_th_G0vYCA3JW5iSN9PDW6iGoNctZCIHeRiwm20yFEPKKSrZK_Bw4hUCVW2bAtoiIYu24QxDrNDVaEA7BEfYQYHc2sefebOr6ju9PsW3AAQLL9ye-47iOh7FvWdjCJwP-hNAK08ls7mLPd23seg62HbuW-60Pm54sSpUov9rfrXqc_gEHPhG1)
+```mermaid
+classDiagram
+    direction LR
+
+    class gvcf{
+        + logs/joinCall-chr
+        - # gvcfs = # samples
+        + joinCall-chr(gvcf, interval) intervalDb
+    }
+
+    gvcf --> intervalDb
+
+    class intervalDb{
+        + logs/genotypeGvcf-chr
+        - # intervalDb = # intervals
+        + genotypeGvcf(interval) intervalVcf
+    }
+
+    intervalDb --> intervalVcf
+
+    class intervalVcf{
+        + # vcfs = # intervals
+        + concatVcfs() chrVcf
+    }
+
+    intervalVcf --> chrVcf
+
+    class chrVcf{
+        + # vcfs = # chr
+        + sort, index
+    }
+
+    namespace batchjob {
+        class gvcf
+        class intervalDb
+        class intervalVcf
+    }
+```
 
 ## create workspace
 
