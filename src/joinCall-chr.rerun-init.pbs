@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -N joinCall-chr.rerun-init.pbs
+#PBS -l select=1:ncpus=2
+#PBS -l walltime=01:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -o logs/joinCall-chr.rerun-init.pbs.log
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+# main
+# collect status info
+chr="${chr:-chr1}"
+statusSum="temp/${RANDOM}.txt"
+grep -Eo "Exit Status: [^0].*" logs/joinCall-${chr}.pbs.log* > $statusSum
+# print in log
+echo "# There are ${#status[@]} errors for logs/joinCall-${chr}.pbs.log* in $statusSum"
+cat $statusSum
+# # get index for rerun
+# while read -r line; do
+#         status=`echo $line | awk '{print $NF}'`
+#         index=`echo $line | awk -F':' '{print $1}' | awk -F '.' '{print $NF}'`
+#         echo $index $status
+# done < $statusSum > rerun-array-index.txt
+# submit script to rerun if statusSum have content
+if [ -s $statusSum ]; then
+    nline=`wc -l $statusSum | awk '{print $1}'`
+    if [ $nline -gt 1 ]; then
+        # submit batch if there are more than 1 line
+        batch="1-${nline}"
+        qsub -v chr="${chr},rerun=${statusSum}" \
+            -l select=1:ncpus=12,walltime=36:00:00 \
+            -J $batch -o logs/joinCall-${chr}.rerun.pbs.log.^array_index^ \
+            src/joinCall-chr.rerun.pbs
+    else
+        # submit single job if there is only 1 line
+        qsub -v chr="${chr},rerun=${statusSum}" \
+            -J $batch -o logs/joinCall-${chr}.rerun.pbs.log \
+            src/joinCall-chr.rerun.pbs
+    fi
+fi

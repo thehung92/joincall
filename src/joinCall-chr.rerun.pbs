@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -N joinCall-chr.pbs
+#PBS -l select=1:ncpus=12
+#PBS -l walltime=24:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -J 1-93
+#PBS -o logs/joinCall-chr.pbs.log.^array_index^
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+source ~/conda/etc/profile.d/conda.sh
+conda activate gatk
+# main
+## get the interval based on index
+chr="${chr:-chr1}"
+intervalDir="intervalDir"
+intervalFile=${intervalDir}/${chr}.interval.list
+### assign PBS_ARRAY_INDEX if not exist
+PBS_ARRAY_INDEX=${PBS_ARRAY_INDEX:-1}
+### conditional index for rerun, if it have variable
+if [ -z $rerun ]; then
+    index=$PBS_ARRAY_INDEX
+else
+    index=`head -n $PBS_ARRAY_INDEX $rerun | tail -n 1 |\
+        awk -F ':' '{print $1}' | awk -F '.' '{print $NF}'`
+fi
+interval=`head -n $index $intervalFile | tail -n 1`
+## find suitable location for outfile
+dir="ga5k.db"
+out=${interval/:/-}
+# main
+gatk GenomicsDBImport \
+    --sample-name-map mapDir/ga5k_${chr}.map \
+    -L ${interval} \
+    --genomicsdb-workspace-path ${dir}/${out}.db \
+    --reader-threads $NCPUS \
+    --batch-size 100 \
+    --bypass-feature-reader \
+    --genomicsdb-shared-posixfs-optimizations \
+    --verbosity WARNING

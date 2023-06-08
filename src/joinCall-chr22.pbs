@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N joinCall-chr22.pbs
+#PBS -l select=1:ncpus=12
+#PBS -l walltime=24:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -J 1-93
+#PBS -o logs/joinCall-chr22.pbs.log.^array_index^
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+source ~/conda/etc/profile.d/conda.sh
+conda activate gatk
+# main
+chr="chr22"
+intervalDir="intervalDir"
+intervalFile=${intervalDir}/${chr}.interval.list
+if [ -z $PBS_ARRAY_INDEX ]; then
+    index=1
+else
+    index=$PBS_ARRAY_INDEX
+fi
+interval=`head -n $index $intervalFile | tail -n 1`
+map="mapDir/ga5k_${chr}.map"
+## find suitable location for outfile
+dir="ga5k.db"
+out=${interval/:/-}
+# main
+gatk GenomicsDBImport \
+    --sample-name-map $map \
+    -L ${interval} \
+    --genomicsdb-workspace-path ${dir}/${out}.db \
+    --reader-threads $NCPUS \
+    --batch-size 100 \
+    --bypass-feature-reader \
+    --genomicsdb-shared-posixfs-optimizations

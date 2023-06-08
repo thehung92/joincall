@@ -1,0 +1,27 @@
+#!/bin/bash
+#PBS -N gatherVcf-chr22.pbs
+#PBS -l select=1:ncpus=12
+#PBS -l walltime=24:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -o logs/gatherVcf-chr22.pbs.log
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+source ~/conda/etc/profile.d/conda.sh
+source activate gatk
+# main
+chr="chr22"
+dir="output"
+out="ga5k.${chr}.vcf.gz"
+# this command output an unsorted vcf file
+gatk GatherVcfs \
+    -I output/ga5k.${chr}.vcf.list \
+    -O ${dir}/${out}
+# sort the vcf file
+picard SortVcf \
+    I=$dir/$out \
+    O=$dir/
+

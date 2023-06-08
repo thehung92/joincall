@@ -1,0 +1,23 @@
+#!/bin/bash
+#PBS -N concatVcfs.pbs
+#PBS -l select=1:ncpus=12
+#PBS -l walltime=24:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -o logs/concatVcfs.pbs.log
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+source ~/conda/etc/profile.d/conda.sh
+source activate biotools
+# main
+chr="chr22"
+dir="output"
+out="ga5k.${chr}.vcf.gz"
+# main # concat create a sorted file # unlike gatk GatherVcfs
+bcftools concat -a -d all \
+    -f output/ga5k.${chr}.vcf.list \
+    -Oz -o $dir/$out
+bcftools index -t $dir/$out

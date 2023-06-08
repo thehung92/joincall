@@ -1,0 +1,31 @@
+#!/bin/bash
+#PBS -N genotypeGvcf-chr.pbs
+#PBS -l select=1:ncpus=12
+#PBS -l walltime=24:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -J 1-93
+#PBS -o logs/genotypeGvcf-chr.pbs.log.^array_index^
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+source ~/conda/etc/profile.d/conda.sh
+source activate gatk
+# main
+reference="/gpfs1/scratch/namrata/reference/GRCh38/hs38DH.fa"
+chr="${chr:-chr1}"
+# PBS_ARRAY_INDEX=1
+intervalFile="intervalDir/${chr}.interval.list"
+interval=`head -n $PBS_ARRAY_INDEX $intervalFile | tail -n 1`
+interval2=${interval/:/-}
+dir="ga5k.vcf"
+database="ga5k.db/${interval2}.db"
+out="${interval2}"
+# main
+gatk GenotypeGVCFs \
+    -R $reference \
+    -V gendb://$database \
+    -O ${dir}/${out}.vcf.gz \
+    --verbosity WARNING

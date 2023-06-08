@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N recalibrateVariant.pbs
+#PBS -l select=1:ncpus=12
+#PBS -l walltime=24:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -o logs/recalibrateVariant.pbs.log
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+mkdir -p logs
+# activate env
+source ~/conda/etc/profile.d/conda.sh
+source activate gatk
+# main
+gatk MakeSitesOnlyVcf \
+	-I ../mex.n3133.biallelicSNPs.vcf.gz \
+	-O mex.n3133.biallelicSNPs.sitesOnly.vcf.gz

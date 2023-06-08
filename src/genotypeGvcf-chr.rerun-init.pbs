@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N genotypeGvcf-chr.rerun-init.pbs
+#PBS -l select=1:ncpus=2
+#PBS -l walltime=01:00:00
+#PBS -q std
+#PBS -j oe
+#PBS -o logs/genotypeGvcf-chr.rerun-init.pbs.log
+#PBS -P 12000454
+# info
+cd $PBS_O_WORKDIR
+# main
+# collect status info
+chr="${chr:-chr1}"
+statusSum="temp/${RANDOM}.txt"
+pattern="logs/genotypeGvcf-${chr}.pbs.log*"
+grep -Eo "Exit Status: [^0].*" $pattern > $statusSum
+# print log
+echo "# There are `wc -l $statusSum | awk '{print $1}'` errors for $pattern in $statusSum"
+cat $statusSum
+#
+# submit script to rerun if statusSum have content
+if [ -s $statusSum ]; then
+    nline=`wc -l $statusSum | awk '{print $1}'`
+    if [ $nline -gt 1 ]; then
+        # submit batch if there are more than 1 line
+        batch="1-${nline}"
+        qsub -v chr="${chr},rerun=${statusSum}" \
+            -l select=1:ncpus=12,walltime=36:00:00 \
+            -J $batch -o logs/genotypeGvcf-${chr}.rerun.pbs.log.^array_index^ \
+            src/genotypeGvcf-chr.rerun.pbs
+    else
+        # submit single job if there is only 1 line
+        qsub -v chr="${chr},rerun=${statusSum}" \
+            -l select=1:ncpus=12,walltime=36:00:00 \
+            -o logs/genotypeGvcf-${chr}.rerun.pbs.log \
+            src/genotypeGvcf-chr.rerun.pbs
+    fi
+fi
