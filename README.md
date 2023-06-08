@@ -32,11 +32,6 @@ classDiagram
         + sort, index
     }
 
-    namespace batchjob {
-        class gvcf
-        class intervalDb
-        class intervalVcf
-    }
 ```
 
 ## create workspace
